@@ -7,44 +7,137 @@ FSJS project 2 - List Filter and Pagination
 
 
 /*** 
-   Add your global variables that store the DOM elements you will 
-   need to reference and/or manipulate. 
+   DOM Variables
+***/
+
+const pageDiv = document.querySelector(`.page`);
+const pageHeaderDiv = document.querySelector(`.page-header`);
+const studentListUL = document.getElementById(`student-list`);
+const studentItemLIs = document.getElementsByClassName(`student-item`);
+
+/*** 
+   Variables
+***/
+
+let numberOfResultsPerPage = 10;
+
+/*** 
+   showPage handles which students to show, given the page
+***/
+
+const showPage = (list, page) => {
+
+   // i.e. for page 1, results should be minIndex 0 and maxIndex 9
+   // for page 2, should be minIndex 10 and maxIndex 19
+   // so on
+
+   // need to subtract by 1 to follow array-index numbering (which starts at 0)
+
+   // example range: 
+   // 0 to 9 | 10 to 19 | etc.
+
+   // 1 * 10 - 1 = 9
+   // 2 * 10 - 1 = 19
+   const maxIndexOfStudentToBeShown = page * numberOfResultsPerPage - 1;
    
-   But be mindful of which variables should be global and which 
-   should be locally scoped to one of the two main functions you're 
-   going to create. A good general rule of thumb is if the variable 
-   will only be used inside of a function, then it can be locally 
-   scoped to that function.
-***/
+   // 1 * 10 - 10 = 0
+   // 2 * 10 - 10 = 10
+   const minIndexOfStudentToBeShown = page * numberOfResultsPerPage - numberOfResultsPerPage; 
+   
+   // loop through the student-item div aka students
+   for (let i = 0; i < list.length; i++) {
 
+      const studentLI = list[i];
 
-
-
-/*** 
-   Create the `showPage` function to hide all of the items in the 
-   list except for the ten you want to show.
-
-   Pro Tips: 
-     - Keep in mind that with a list of 54 students, the last page 
-       will only display four.
-     - Remember that the first student has an index of 0.
-     - Remember that a function `parameter` goes in the parens when 
-       you initially define the function, and it acts as a variable 
-       or a placeholder to represent the actual function `argument` 
-       that will be passed into the parens later when you call or 
-       "invoke" the function 
-***/
-
+      // only show the <li> if it is in valid range
+      if (i <= maxIndexOfStudentToBeShown && i >= minIndexOfStudentToBeShown) {
+         studentLI.style.display = `block`;
+      } else {
+         studentLI.style.display = `none`;
+      }
+   }
+};
 
 
 
 /*** 
-   Create the `appendPageLinks function` to generate, append, and add 
-   functionality to the pagination buttons.
+   appendPageLinks will generate the clickable elements for pagination and will setup event listeners to said elements
 ***/
 
+const appendPageLinks = (list) => {
+   // figure out how many pages are needed
+   // example: 
+   // if 45 students, then need 5 pages
+   // page 1 = 0 to 9
+   // page 2 = 10 to 19
+   // page 3 = 20 to 29
+   // page 4 = 30 to 39
+   // page 5 = 40 to 45 (49max)
+   const pagesNeeded = Math.ceil(list.length / numberOfResultsPerPage); // 45 / 10 =  4.5. use ceil to round up to 5
+
+   console.log(`Total # of students: ${list.length}`);
+   
+   console.log(`Pages needed: ${pagesNeeded}`);
+   
+   // create pagination div
+   const paginationDiv = document.createElement(`div`);
+   paginationDiv.className = `pagination`;
+
+   // create the ul
+   const ul = document.createElement(`ul`);
+
+   // create li's based on pagesNeeded
+   for (let i = 0; i < pagesNeeded; i++) {
+      const li = document.createElement(`li`);
+      const a = document.createElement(`a`);
+
+      const pageNumber = `${i + 1}`;
+
+      a.text = pageNumber;
+      a.href = `#`;
+
+      // add click listener for the <a> 
+      a.addEventListener(`click`, (event) => {
+
+         showPage(list, pageNumber);
+
+         // get all <a> with `active` class and remove ALL active classes
+         const activeLinks = document.querySelectorAll(`.active`);
+
+         for (let i = 0; i < activeLinks.length; i++) {
+            const activeLink = activeLinks[i];
+            // remove all active classes
+            activeLink.classList.remove(`active`);
+         }
+
+         // add the active class to this newly clicked <a>
+         event.target.className = `active`;
+      });
+
+      li.append(a);
+      ul.append(li);
+   }
+
+   paginationDiv.append(ul);
+   pageDiv.append(paginationDiv);
+};
+
+/*** 
+   Programmatically click the first anchor
+***/
+const clickFirstPage = () => {
+   const firstPageAnchor = document.querySelector(`ul li a`);
+   firstPageAnchor.click();
+};
+
+/*** 
+   Setup the page
+***/
+
+const setupPage = () => {
+   appendPageLinks(studentItemLIs);
+   clickFirstPage();
+};
 
 
-
-
-// Remember to delete the comments that came with this file, and replace them with your own code comments.
+setupPage();
