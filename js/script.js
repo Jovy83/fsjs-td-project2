@@ -58,8 +58,6 @@ const showPage = (list, page) => {
    }
 };
 
-
-
 /*** 
    appendPageLinks will generate the clickable elements for pagination and will setup event listeners to said elements
 ***/
@@ -123,6 +121,23 @@ const appendPageLinks = (list) => {
 };
 
 /*** 
+   Setup search bar
+***/
+const setupSearchBar = () => {
+   const studentSearchDiv = document.createElement(`div`);
+   const searchInput = document.createElement(`input`);
+   const searchButton = document.createElement(`button`);
+
+   studentSearchDiv.className = `student-search`;
+   searchInput.placeholder = `Search for students...`;
+   searchButton.textContent = `Search`;
+
+   studentSearchDiv.append(searchInput);
+   studentSearchDiv.append(searchButton);
+   pageHeaderDiv.append(studentSearchDiv);
+};
+
+/*** 
    Programmatically click the first anchor
 ***/
 const clickFirstPage = () => {
@@ -133,11 +148,10 @@ const clickFirstPage = () => {
 /*** 
    Setup the page
 ***/
-
 const setupPage = () => {
+   setupSearchBar();
    appendPageLinks(studentItemLIs);
    clickFirstPage();
 };
-
 
 setupPage();
