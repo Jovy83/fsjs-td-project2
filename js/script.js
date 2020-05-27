@@ -20,8 +20,8 @@ const studentItemLIs = document.getElementsByClassName(`student-item`);
 ***/
 
 const numberOfResultsPerPage = 10;
-const filteredStudentItemLIs = [];
-const filteredStudentNames = [];
+let filteredStudentItemLIs = [];
+let filteredStudentNames = [];
 
 /*** 
    showPage handles which students to show, given the page
@@ -179,48 +179,61 @@ document.getElementById(`searchBar`).addEventListener(`keyup`, (event) => {
 
    // get search text from search bar
    const searchText = event.target.value.toLowerCase();
+   const searchTextIsEmpty = (searchText === ``);
    
    // loop through the studentLIs 
    for (let i = 0; i < studentItemLIs.length; i++) {
       const studentItemLI = studentItemLIs[i];
       // get the name of the student
       const studentName = studentItemLI.querySelector(`h3`).textContent;
-      
-      // compare with search text
-      if (studentName.includes(searchText)) {
-         // if match, add the LI and the studentName to our filtered arrays
-         // but don't add if it's already in the filtered array. we don't want duplicates
-         if (!filteredStudentNames.includes(studentName)) {
 
-            filteredStudentNames.push(studentName);
-            filteredStudentItemLIs.push(studentItemLI);
-            // also show the LI
-            studentItemLI.style.display = `block`;
-         }
-         
+      // if the searchbar is empty, simply show all students
+      // and empty our filtered arrays
+      if (searchTextIsEmpty) {
+         filteredStudentNames = [];
+         filteredStudentItemLIs = [];
+         studentItemLI.style.display = `block`;
       } else {
-         // else, don't add to our filtered arrays
-         // or if added already, then remove from our filtered arrays
+         // compare with search text
+         if (studentName.includes(searchText)) {
+            // if match, add the LI and the studentName to our filtered arrays
+            // but don't add if it's already in the filtered array. we don't want duplicates
+            if (!filteredStudentNames.includes(studentName)) {
 
-         if (filteredStudentNames.includes(studentName)) {
-            const index = filteredStudentNames.indexOf(studentName);
-            if (index > -1) {
-               filteredStudentNames.splice(index, 1);
-               filteredStudentItemLIs.splice(index, 1);
+               filteredStudentNames.push(studentName);
+               filteredStudentItemLIs.push(studentItemLI);
+               // also show the LI
+               studentItemLI.style.display = `block`;
             }
+            
+         } else {
+            // else, don't add to our filtered arrays
+            // or if added already, then remove from our filtered arrays
+
+            if (filteredStudentNames.includes(studentName)) {
+               const index = filteredStudentNames.indexOf(studentName);
+               if (index > -1) {
+                  filteredStudentNames.splice(index, 1);
+                  filteredStudentItemLIs.splice(index, 1);
+               }
+            }
+
+            // also hide the LI
+            studentItemLI.style.display = `none`;
          }
-
-         // also hide the LI
-         studentItemLI.style.display = `none`;
       }
-
    }
 
-   // remove existing page links
+   // remove existing page links to make way for the updated page links
    removePageLinks();
 
-   // need to recall appendPageLinks with the filtered array
-   appendPageLinks(filteredStudentItemLIs);
+   if (searchTextIsEmpty) {
+      // need to recall appendPageLinks with the original array
+      appendPageLinks(studentItemLIs);
+   } else {
+      // need to recall appendPageLinks with the filtered array
+      appendPageLinks(filteredStudentItemLIs);
+   }
 
    // finally need to click the page1 link, to avoid showing more results than the numberOfResultsPerPage
    clickFirstPage();
