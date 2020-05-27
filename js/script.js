@@ -12,7 +12,7 @@ FSJS project 2 - List Filter and Pagination
 
 const pageDiv = document.querySelector(`.page`);
 const pageHeaderDiv = document.querySelector(`.page-header`);
-const studentListUL = document.getElementById(`student-list`);
+const studentListUL = document.querySelector(`.student-list`);
 const studentItemLIs = document.getElementsByClassName(`student-item`);
 
 /*** 
@@ -132,6 +132,31 @@ const removePageLinks = () => {
 };
 
 /*** 
+   Display no results message
+***/
+
+const showNoResultsMessage = () => {
+
+   // if already exists and in the page, don't add any more. will just cause duplicates
+   if (document.getElementById(`noResultMessage`) === null) {
+      const messageLI = document.createElement(`li`);
+      messageLI.id = `noResultMessage`;
+      messageLI.textContent = `We can't find who you're looking for.`;
+   
+      studentListUL.append(messageLI);
+   }
+   
+};
+
+const removeNoResultsMessage = () => {
+   const messageLI = document.getElementById(`noResultMessage`);
+
+   if (messageLI !== null) {
+      messageLI.remove();
+   }
+};
+
+/*** 
    Setup search bar
 ***/
 
@@ -156,7 +181,10 @@ const setupSearchBar = () => {
 
 const clickFirstPage = () => {
    const firstPageAnchor = document.querySelector(`ul li a`);
-   firstPageAnchor.click();
+
+   if (firstPageAnchor !== null) {
+      firstPageAnchor.click();
+   }
 };
 
 /*** 
@@ -233,8 +261,18 @@ document.getElementById(`searchBar`).addEventListener(`keyup`, (event) => {
    } else {
       // need to recall appendPageLinks with the filtered array
       appendPageLinks(filteredStudentItemLIs);
+
+      // if search results came back empty, show a message
+      console.log(filteredStudentItemLIs.length);
+      
+      if (filteredStudentItemLIs.length === 0) {
+         showNoResultsMessage();
+      } else {
+         removeNoResultsMessage();
+      }
    }
 
    // finally need to click the page1 link, to avoid showing more results than the numberOfResultsPerPage
    clickFirstPage();
 });
+
