@@ -19,7 +19,9 @@ const studentItemLIs = document.getElementsByClassName(`student-item`);
    Variables
 ***/
 
-let numberOfResultsPerPage = 10;
+const numberOfResultsPerPage = 10;
+const filteredStudentItemLIs = [];
+const filteredStudentNames = [];
 
 /*** 
    showPage handles which students to show, given the page
@@ -121,8 +123,18 @@ const appendPageLinks = (list) => {
 };
 
 /*** 
+   Remove existing page links
+***/
+
+const removePageLinks = () => {
+   const paginationDiv = document.querySelector(`.pagination`);
+   paginationDiv.remove();
+};
+
+/*** 
    Setup search bar
 ***/
+
 const setupSearchBar = () => {
    const studentSearchDiv = document.createElement(`div`);
    const searchInput = document.createElement(`input`);
@@ -130,6 +142,7 @@ const setupSearchBar = () => {
 
    studentSearchDiv.className = `student-search`;
    searchInput.placeholder = `Search for students...`;
+   searchInput.id = `searchBar`
    searchButton.textContent = `Search`;
 
    studentSearchDiv.append(searchInput);
@@ -140,18 +153,75 @@ const setupSearchBar = () => {
 /*** 
    Programmatically click the first anchor
 ***/
+
 const clickFirstPage = () => {
    const firstPageAnchor = document.querySelector(`ul li a`);
    firstPageAnchor.click();
 };
 
 /*** 
-   Setup the page
+   Init the page
 ***/
-const setupPage = () => {
+
+const initPage = () => {
    setupSearchBar();
    appendPageLinks(studentItemLIs);
    clickFirstPage();
 };
 
-setupPage();
+initPage();
+
+/*** 
+   Search bar input listener
+***/
+
+document.getElementById(`searchBar`).addEventListener(`keyup`, (event) => {
+
+   // get search text from search bar
+   const searchText = event.target.value.toLowerCase();
+   
+   // loop through the studentLIs 
+   for (let i = 0; i < studentItemLIs.length; i++) {
+      const studentItemLI = studentItemLIs[i];
+      // get the name of the student
+      const studentName = studentItemLI.querySelector(`h3`).textContent;
+      
+      // compare with search text
+      if (studentName.includes(searchText)) {
+         // if match, add the LI and the studentName to our filtered arrays
+         // but don't add if it's already in the filtered array. we don't want duplicates
+         if (!filteredStudentNames.includes(studentName)) {
+
+            filteredStudentNames.push(studentName);
+            filteredStudentItemLIs.push(studentItemLI);
+            // also show the LI
+            studentItemLI.style.display = `block`;
+         }
+         
+      } else {
+         // else, don't add to our filtered arrays
+         // or if added already, then remove from our filtered arrays
+
+         if (filteredStudentNames.includes(studentName)) {
+            const index = filteredStudentNames.indexOf(studentName);
+            if (index > -1) {
+               filteredStudentNames.splice(index, 1);
+               filteredStudentItemLIs.splice(index, 1);
+            }
+         }
+
+         // also hide the LI
+         studentItemLI.style.display = `none`;
+      }
+
+   }
+
+   // remove existing page links
+   removePageLinks();
+
+   // need to recall appendPageLinks with the filtered array
+   appendPageLinks(filteredStudentItemLIs);
+
+   // finally need to click the page1 link, to avoid showing more results than the numberOfResultsPerPage
+   clickFirstPage();
+});
